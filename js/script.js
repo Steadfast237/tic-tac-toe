@@ -43,11 +43,7 @@ const Game_Board = function () {
     get_cell(row_column).set_cell_value(player);
   };
 
-  const print_board = function () {
-    console.log(board.map((row) => row.map((cell) => cell.get_cell_value())));
-  };
-
-  return { place_marker, get_board, print_board, get_cell };
+  return { place_marker, get_board, get_cell };
 };
 
 const Game_Controller = function (
@@ -119,25 +115,11 @@ const Game_Controller = function (
   };
 
   const play_round = function (row_column) {
-    console.log(`${active_player.name} is placing his mark`);
-
-    if (is_cell_taken(row_column)) {
-      return;
-    }
+    if (is_cell_taken(row_column)) return;
 
     game_board.place_marker(row_column, active_player);
 
-    game_board.print_board();
-
-    if (is_winner()) {
-      console.log(`WINNER IS ${active_player.name.toUpperCase()}!!!`);
-      return;
-    }
-
-    if (is_tie()) {
-      console.log('DRAW, NO WINNER');
-      return;
-    }
+    if (is_winner() || is_tie()) return;
 
     switch_active_player();
   };
@@ -159,6 +141,7 @@ const Screen_Controller = function () {
   const grid = document.querySelector('.grid');
   const active_player = document.querySelector('.active-player');
   const restart_button = document.querySelector('.btn-restart');
+
   let game_controller = Game_Controller();
 
   const click_handler_grid = function (e) {
@@ -168,21 +151,12 @@ const Screen_Controller = function () {
 
     game_controller.play_round(target.dataset.index);
 
-    if (game_controller.is_winner()) {
+    if (game_controller.is_winner() || game_controller.is_tie()) {
       update_screen();
 
-      active_player.textContent = `WINNER IS PLAYER ${
-        game_controller.get_active_player().marker
-      }`;
-
-      grid.removeEventListener('click', click_handler_grid);
-      return;
-    }
-
-    if (game_controller.is_tie()) {
-      update_screen();
-
-      active_player.textContent = `DRAW, NO WINNER`;
+      active_player.textContent = game_controller.is_winner()
+        ? `WINNER IS PLAYER ${game_controller.get_active_player().marker}`
+        : `DRAW, NO WINNER`;
 
       grid.removeEventListener('click', click_handler_grid);
       return;
@@ -226,6 +200,7 @@ const Screen_Controller = function () {
 
   restart_button.addEventListener('click', function (e) {
     game_controller = Game_Controller();
+
     update_screen();
     grid.addEventListener('click', click_handler_grid);
   });
