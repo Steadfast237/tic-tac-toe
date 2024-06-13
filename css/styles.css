@@ -1,0 +1,26 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  height: 100vh;
+  max-width: 960px;
+  margin: 0 auto;
+  border: 1px solid red;
+}
+
+.grid {
+  width: 480px;
+  height: auto;
+  display: grid;
+
+  grid-template-columns: repeat(3, 160px);
+  grid-template-rows: repeat(3, 160px);
+}
+
+.btn-cell {
+  font-size: 64px;
+  font-weight: bolder;
+}

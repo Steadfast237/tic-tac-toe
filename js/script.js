@@ -142,5 +142,96 @@ const Game_Controller = function (
     switch_active_player();
   };
 
-  return { play_round, active_player, board: game_board };
+  const get_active_player = function () {
+    return active_player;
+  };
+
+  return {
+    play_round,
+    get_active_player,
+    board: game_board,
+    is_winner,
+    is_tie,
+  };
 };
+
+const Screen_Controller = function () {
+  const grid = document.querySelector('.grid');
+  const active_player = document.querySelector('.active-player');
+  const restart_button = document.querySelector('.btn-restart');
+  let game_controller = Game_Controller();
+
+  const click_handler_grid = function (e) {
+    const target = e.target;
+
+    if (target.tagName !== 'BUTTON') return;
+
+    game_controller.play_round(target.dataset.index);
+
+    if (game_controller.is_winner()) {
+      update_screen();
+
+      active_player.textContent = `WINNER IS PLAYER ${
+        game_controller.get_active_player().marker
+      }`;
+
+      grid.removeEventListener('click', click_handler_grid);
+      return;
+    }
+
+    if (game_controller.is_tie()) {
+      update_screen();
+
+      active_player.textContent = `DRAW, NO WINNER`;
+
+      grid.removeEventListener('click', click_handler_grid);
+      return;
+    }
+
+    update_screen();
+  };
+
+  const update_screen = function () {
+    grid.textContent = '';
+
+    active_player.textContent = `Player ${
+      game_controller.get_active_player().marker
+    }'s turn`;
+
+    game_controller.board.get_board().forEach((row, row_index) =>
+      row.forEach((cell, column_index) => {
+        const button = document.createElement('button');
+
+        switch (cell.get_cell_value()) {
+          case 0:
+            button.textContent = '';
+            break;
+
+          case 1:
+            button.textContent = 'x';
+            break;
+
+          case 2:
+            button.textContent = 'o';
+            break;
+        }
+
+        button.setAttribute('class', 'btn btn-cell');
+        button.dataset.index = `${row_index}_${column_index}`;
+
+        grid.appendChild(button);
+      })
+    );
+  };
+
+  restart_button.addEventListener('click', function (e) {
+    game_controller = Game_Controller();
+    update_screen();
+    grid.addEventListener('click', click_handler_grid);
+  });
+
+  update_screen();
+  grid.addEventListener('click', click_handler_grid);
+};
+
+Screen_Controller();
