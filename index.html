@@ -3,21 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tic Tac Toe</title>
-    <script src="./js/script.js" defer></script>
+    <title>Tic-Tac-Toe</title>
     <link rel="stylesheet" href="./css/styles.css" />
+    <script src="./js/script.js" defer></script>
   </head>
   <body>
-    <div class="container">
-      <header class="header">
-        <h1>Tic Tac Toe</h1>
-      </header>
+    <h1>Tic-Tac-Toe</h1>
 
-      <main class="main">
-        <div class="active-player"></div>
-        <div class="grid"></div>
-        <button class="btn btn-restart">RESTART</button>
-      </main>
+    <div class="game-container">
+      <div class="active-player"></div>
+
+      <div class="board">
+        <button class="cell" data-cell="0_0"></button>
+        <button class="cell" data-cell="0_1"></button>
+        <button class="cell" data-cell="0_2"></button>
+        <button class="cell" data-cell="1_0"></button>
+        <button class="cell" data-cell="1_1"></button>
+        <button class="cell" data-cell="1_2"></button>
+        <button class="cell" data-cell="2_0"></button>
+        <button class="cell" data-cell="2_1"></button>
+        <button class="cell" data-cell="2_2"></button>
+      </div>
+
+      <button class="restart">Restart</button>
     </div>
   </body>
 </html>

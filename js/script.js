@@ -1,182 +1,186 @@
 const Cell = function () {
   let value = 0;
 
-  const set_cell_value = function (player) {
+  const setCell = function (player) {
     value = player.marker;
   };
 
-  const get_cell_value = function () {
+  const getCell = function () {
     return value;
   };
 
-  return { get_cell_value, set_cell_value };
+  return { getCell, setCell };
 };
 
-const Game_Board = function () {
-  const row_size = 3;
-  const column_size = 3;
+const GameBoard = function () {
+  const rowSize = 3;
+  const columnSize = 3;
   const board = [];
 
   // SETUP  BOARD
-  for (let i = 0; i < row_size; i++) {
+  for (let i = 0; i < rowSize; i++) {
     const row = [];
 
-    for (let y = 0; y < column_size; y++) {
+    for (let y = 0; y < columnSize; y++) {
       row.push(Cell());
     }
 
     board.push(row);
   }
 
-  const get_board = function () {
+  const getBoard = function () {
     return board;
   };
 
-  const get_cell = function (row_column) {
-    const row = Number(row_column.split('_')[0]);
-    const column = Number(row_column.split('_')[1]);
+  const getCell = function (rowColumn) {
+    const row = Number(rowColumn.split('_')[0]);
+    const column = Number(rowColumn.split('_')[1]);
 
     return board[row][column];
   };
 
-  const place_marker = function (row_column, player) {
-    get_cell(row_column).set_cell_value(player);
+  const placeMarker = function (rowColumn, player) {
+    getCell(rowColumn).setCell(player);
   };
 
-  return { place_marker, get_board, get_cell };
+  return { placeMarker, getBoard, getCell };
 };
 
-const Game_Controller = function (
-  player_one_name = 'player_one',
-  player_two_name = 'player_two'
+const GameController = function (
+  playerOneName = 'player_one',
+  playerTwoName = 'player_two'
 ) {
-  const game_board = Game_Board();
+  const gameBoard = GameBoard();
   const players = [
     {
-      name: player_one_name,
+      name: playerOneName,
       marker: 1,
     },
 
     {
-      name: player_two_name,
+      name: playerTwoName,
       marker: 2,
     },
   ];
-  let active_player = players[0];
+  let activePlayer = players[0];
 
-  const switch_active_player = function () {
-    active_player =
-      active_player.marker === players[0].marker ? players[1] : players[0];
+  const switchActivePlayer = function () {
+    activePlayer =
+      activePlayer.marker === players[0].marker ? players[1] : players[0];
   };
 
-  const three_in_a_row = function (arr) {
+  const threeInRow = function (arr) {
     return arr
       .map((row) => {
-        const first_cell = row[0].get_cell_value();
-        if (first_cell === 0) {
+        const firstCell = row[0].getCell();
+        if (firstCell === 0) {
           return false;
         }
-        return row.every((cell) => cell.get_cell_value() === first_cell);
+        return row.every((cell) => cell.getCell() === firstCell);
       })
       .some((result) => result);
   };
 
-  const is_cell_taken = function (row_column) {
-    return game_board.get_cell(row_column).get_cell_value() === 0
-      ? false
-      : true;
+  const isCellTaken = function (rowColumn) {
+    return gameBoard.getCell(rowColumn).getCell() === 0 ? false : true;
   };
 
-  const is_winner = function () {
-    const board = game_board.get_board();
-    const row_board = board;
-    const column_board = [
+  const isWinner = function () {
+    const board = gameBoard.getBoard();
+    const rowBoard = board;
+    const columnBoard = [
       [board[0][0], board[1][0], board[2][0]],
       [board[0][1], board[1][1], board[2][1]],
       [board[0][2], board[1][2], board[2][2]],
     ];
-    const diagonal_board = [
+    const diagonalBoard = [
       [board[0][0], board[1][1], board[2][2]],
       [board[2][0], board[1][1], board[0][2]],
     ];
 
     return (
-      three_in_a_row(row_board) ||
-      three_in_a_row(column_board) ||
-      three_in_a_row(diagonal_board)
+      threeInRow(rowBoard) ||
+      threeInRow(columnBoard) ||
+      threeInRow(diagonalBoard)
     );
   };
 
-  const is_tie = function () {
-    return game_board
-      .get_board()
+  const isTie = function () {
+    return gameBoard
+      .getBoard()
       .flat(2)
-      .every((cell) => cell.get_cell_value() !== 0);
+      .every((cell) => cell.getCell() !== 0);
   };
 
-  const play_round = function (row_column) {
-    if (is_cell_taken(row_column)) return;
+  const playRound = function (rowColumn) {
+    if (isCellTaken(rowColumn)) return;
 
-    game_board.place_marker(row_column, active_player);
+    gameBoard.placeMarker(rowColumn, activePlayer);
 
-    if (is_winner() || is_tie()) return;
+    if (isWinner() || isTie()) return;
 
-    switch_active_player();
+    switchActivePlayer();
   };
 
-  const get_active_player = function () {
-    return active_player;
+  const getActivePlayer = function () {
+    return activePlayer;
   };
 
   return {
-    play_round,
-    get_active_player,
-    board: game_board,
-    is_winner,
-    is_tie,
+    playRound,
+    getActivePlayer,
+    board: gameBoard,
+    isWinner,
+    isTie,
   };
 };
 
-const Screen_Controller = function () {
-  const grid = document.querySelector('.grid');
-  const active_player = document.querySelector('.active-player');
-  const restart_button = document.querySelector('.btn-restart');
+const ScreenController = function () {
+  const board = document.querySelector('.board');
+  const restart = document.querySelector('.restart');
+  const activePlayer = document.querySelector('.active-player');
 
-  let game_controller = Game_Controller();
+  let gameController = GameController();
 
-  const click_handler_grid = function (e) {
+  const clickHandlerBoard = function (e) {
     const target = e.target;
 
     if (target.tagName !== 'BUTTON') return;
 
-    game_controller.play_round(target.dataset.index);
+    gameController.playRound(target.dataset.cell);
 
-    if (game_controller.is_winner() || game_controller.is_tie()) {
-      update_screen();
+    if (gameController.isWinner() || gameController.isTie()) {
+      updateScreen();
 
-      active_player.textContent = game_controller.is_winner()
-        ? `WINNER IS PLAYER ${game_controller.get_active_player().marker}`
+      activePlayer.textContent = gameController.isWinner()
+        ? `WINNER IS PLAYER ${gameController.getActivePlayer().marker}`
         : `DRAW, NO WINNER`;
 
-      grid.removeEventListener('click', click_handler_grid);
+      board.removeEventListener('click', clickHandlerBoard);
       return;
     }
 
-    update_screen();
+    updateScreen();
   };
 
-  const update_screen = function () {
-    grid.textContent = '';
+  const clickHandlerRestart = function () {
+    gameController = GameController();
+    board.addEventListener('click', clickHandlerBoard);
+    updateScreen();
+  };
 
-    active_player.textContent = `Player ${
-      game_controller.get_active_player().marker
-    }'s turn`;
+  const updateScreen = function () {
+    activePlayer.textContent = `Current Player: ${
+      gameController.getActivePlayer().marker
+    }`;
 
-    game_controller.board.get_board().forEach((row, row_index) =>
-      row.forEach((cell, column_index) => {
-        const button = document.createElement('button');
+    gameController.board.getBoard().forEach((row, rowIndex) =>
+      row.forEach((cell, columnIndex) => {
+        const button = document.querySelector(
+          `[data-cell="${rowIndex}_${columnIndex}"]`
+        );
 
-        switch (cell.get_cell_value()) {
+        switch (cell.getCell()) {
           case 0:
             button.textContent = '';
             break;
@@ -189,24 +193,14 @@ const Screen_Controller = function () {
             button.textContent = 'o';
             break;
         }
-
-        button.setAttribute('class', 'btn btn-cell');
-        button.dataset.index = `${row_index}_${column_index}`;
-
-        grid.appendChild(button);
       })
     );
   };
 
-  restart_button.addEventListener('click', function (e) {
-    game_controller = Game_Controller();
+  board.addEventListener('click', clickHandlerBoard);
+  restart.addEventListener('click', clickHandlerRestart);
 
-    update_screen();
-    grid.addEventListener('click', click_handler_grid);
-  });
-
-  update_screen();
-  grid.addEventListener('click', click_handler_grid);
+  updateScreen();
 };
 
-Screen_Controller();
+ScreenController();
